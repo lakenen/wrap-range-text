@@ -4,7 +4,7 @@
   "description": "Safely wrap all selected text contained within a DOM Range",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/browserify test/*.js | ./node_modules/.bin/testling"
   },
   "author": "Cameron Lakenen <cameron@lakenen.com>",
   "license": "MIT",
@@ -22,5 +22,10 @@
     "range",
     "DOM",
     "wrap"
-  ]
+  ],
+  "devDependencies": {
+    "browserify": "^8.1.1",
+    "tape": "^3.4.0",
+    "testling": "^1.7.1"
+  }
 }

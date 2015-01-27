@@ -42,7 +42,8 @@ function rangeIntersectsNode(range, node) {
 
 // return all non-empty text nodes fully or partially selected by `range`
 function getRangeTextNodes(range) {
-  var nodes = getTextNodes(range.commonAncestorContainer)
+  var container = range.commonAncestorContainer
+    , nodes = getTextNodes(container.parentNode || container)
 
   return nodes.filter(function (node) {
     return rangeIntersectsNode(range, node) && isNonEmptyTextNode(node)
@@ -77,7 +78,11 @@ function unwrap(el) {
 
 // undo the effect of `wrapRangeText`, given a resulting array of wrapper `nodes`
 function undo(nodes) {
-  nodes.forEach(unwrap)
+  nodes.forEach(function (node) {
+    var parent = node.parentNode
+    unwrap(node)
+    parent.normalize()
+  })
 }
 
 // create a node wrapper function
