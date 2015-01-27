@@ -40,21 +40,79 @@ function rangeIntersectsNode(range, node) {
   }
 }
 
-// return all text nodes fully or partially selected by `range`
+// return all non-empty text nodes fully or partially selected by `range`
 function getRangeTextNodes(range) {
   var nodes = getTextNodes(range.commonAncestorContainer)
 
   return nodes.filter(function (node) {
-    return rangeIntersectsNode(range, node)
+    return rangeIntersectsNode(range, node) && isNonEmptyTextNode(node)
   })
 }
 
+// returns true if `node` has text content
+function isNonEmptyTextNode(node) {
+  return node.textContent.length > 0
+}
+
+// remove `el` from the DOM
+function remove(el) {
+  if (el.parentNode) {
+    el.parentNode.removeChild(el)
+  }
+}
+
+// replace `node` with `replacementNode`
+function replaceNode(replacementNode, node) {
+  remove(replacementNode)
+  node.parentNode.insertBefore(replacementNode, node)
+  remove(node)
+}
+
+// unwrap `el` by replacing itself with its contents
+function unwrap(el) {
+  var range = document.createRange()
+  range.selectNodeContents(el)
+  replaceNode(range.extractContents(), el)
+}
+
+// undo the effect of `wrapRangeText`, given a resulting array of wrapper `nodes`
+function undo(nodes) {
+  nodes.forEach(unwrap)
+}
+
+// create a node wrapper function
+function createWrapperFunction(wrapperEl, range) {
+    var startNode = range.startContainer
+      , endNode = range.endContainer
+      , startOffset = range.startOffset
+      , endOffset = range.endOffset
+
+  return function wrapNode(node) {
+    var currentRange = document.createRange()
+      , currentWrapper = wrapperEl.cloneNode()
+
+    currentRange.selectNodeContents(node)
+
+    if (node === startNode && startNode.nodeType === 3) {
+      currentRange.setStart(node, startOffset)
+      startNode = currentWrapper
+      startOffset = 0
+    }
+    if (node === endNode && endNode.nodeType === 3) {
+      currentRange.setEnd(node, endOffset)
+      endNode = currentWrapper
+      endOffset = 1
+    }
+
+    currentRange.surroundContents(currentWrapper)
+    return currentWrapper
+  }
+}
+
 function wrapRangeText(wrapperEl, range) {
-  var startNode
-    , endNode
-    , startOffset
-    , endOffset
-    , nodes
+  var nodes
+    , wrapNode
+    , wrapperObj = {}
 
   if (typeof range === 'undefined') {
     // get the current selection if no range is specified
@@ -75,57 +133,20 @@ function wrapRangeText(wrapperEl, range) {
     wrapperEl = document.createElement(wrapperEl)
   }
 
-  startNode = range.startContainer
-  endNode = range.endContainer
-  startOffset = range.startOffset
-  endOffset = range.endOffset
+  wrapNode = createWrapperFunction(wrapperEl, range)
 
-  nodes = getRangeTextNodes(range).map(function (node) {
-    var currentRange = document.createRange()
-      , currentWrapper = wrapperEl.cloneNode()
+  nodes = getRangeTextNodes(range)
+  nodes = nodes.map(wrapNode)
 
-    currentRange.selectNodeContents(node)
-
-    if (node === startNode && startNode.nodeType === 3) {
-      currentRange.setStart(node, startOffset)
-      startNode = currentWrapper
-      startOffset = 0
+  wrapperObj.nodes = nodes
+  wrapperObj.unwrap = function () {
+    if (this.nodes.length) {
+      undo(this.nodes)
+      this.nodes = []
     }
-    if (node === endNode && endNode.nodeType === 3) {
-      currentRange.setEnd(node, endOffset)
-      endNode = currentWrapper
-      endOffset = 1
-    }
-
-    currentRange.surroundContents(currentWrapper)
-    return currentWrapper
-  })
-
-  return nodes
-}
-
-
-function remove(el) {
-  if (el.parentNode) {
-    el.parentNode.removeChild(el)
   }
-}
 
-function replaceNode(replacement, node) {
-  remove(replacement)
-  node.parentNode.insertBefore(replacement, node)
-  remove(node)
-}
-
-function unwrap(el) {
-  var range = document.createRange()
-  range.selectNodeContents(el)
-  replaceNode(range.extractContents(), el)
-}
-
-function undo(nodes) {
-  nodes.forEach(unwrap)
+  return wrapperObj
 }
 
 module.exports = wrapRangeText
-module.exports.undo = undo
