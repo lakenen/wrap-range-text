@@ -1,0 +1,26 @@
+{
+  "name": "wrap-range-text",
+  "version": "0.1.0",
+  "description": "Safely wrap all selected text contained within a DOM Range",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Cameron Lakenen <cameron@lakenen.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lakenen/wrap-range-text.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lakenen/wrap-range-text/issues"
+  },
+  "homepage": "https://github.com/lakenen/wrap-range-text",
+  "keywords": [
+    "text",
+    "selection",
+    "range",
+    "DOM",
+    "wrap"
+  ]
+}
