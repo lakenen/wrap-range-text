@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/lakenen/wrap-range-text.png?branch=master)](https://travis-ci.org/lakenen/wrap-range-text)
+
 # wrap-range-text
 
 Safely wrap all selected text contained within a DOM Range.
