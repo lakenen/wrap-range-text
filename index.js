@@ -40,10 +40,40 @@ function rangeIntersectsNode(range, node) {
   }
 }
 
+function unique(a) {
+    return a.reduce(function(p, c) {
+        if (p.indexOf(c) < 0) p.push(c)
+        return p
+    }, [])
+}
+
 // return all non-empty text nodes fully or partially selected by `range`
 function getRangeTextNodes(range) {
   var container = range.commonAncestorContainer
     , nodes = getTextNodes(container.parentNode || container)
+
+  return nodes.filter(function (node) {
+    return rangeIntersectsNode(range, node) && isNonEmptyTextNode(node)
+  })
+}
+
+function getRangeStaticNodes(range) {
+  var container = range.commonAncestorContainer
+    , nodes = getTextNodes(container.parentNode || container)
+
+  var sel = document.getSelection()
+  sel.removeAllRanges()
+  sel.addRange(range)
+
+  nodes = nodes.map(function (node) {
+    console.log(window.getComputedStyle(node.parentNode).position, sel.containsNode(node))
+    while (window.getComputedStyle(node.parentNode).position === 'static' && (node = node.parentNode) && sel.containsNode(node)) {}
+    return node
+  })
+
+  nodes = unique(nodes)
+
+  console.log(nodes)
 
   return nodes.filter(function (node) {
     return rangeIntersectsNode(range, node) && isNonEmptyTextNode(node)
@@ -96,7 +126,7 @@ function createWrapperFunction(wrapperEl, range) {
     var currentRange = document.createRange()
       , currentWrapper = wrapperEl.cloneNode()
 
-    currentRange.selectNodeContents(node)
+    currentRange.selectNode(node)
 
     if (node === startNode && startNode.nodeType === 3) {
       currentRange.setStart(node, startOffset)
@@ -140,7 +170,7 @@ function wrapRangeText(wrapperEl, range) {
 
   wrapNode = createWrapperFunction(wrapperEl, range)
 
-  nodes = getRangeTextNodes(range)
+  nodes = getRangeStaticNodes(range)
   nodes = nodes.map(wrapNode)
 
   wrapperObj.nodes = nodes
