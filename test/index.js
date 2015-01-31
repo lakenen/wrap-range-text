@@ -121,3 +121,16 @@ test('should not wrap empty text nodes', function (t, el) {
   t.ok(!el.querySelector('span.empty i'), 'empty node should not be wrapped')
   t.end()
 })
+
+test('should not throw an error if the common ancestor node is #document', function (t, el) {
+  var range = document.createRange()
+    , wrapper = create('i')
+    , wrap
+
+  range.selectNode(document.documentElement)
+
+  t.doesNotThrow(function () {
+    wrap = wrapRange(wrapper, range)
+  }, 'does not throw')
+  t.end()
+})

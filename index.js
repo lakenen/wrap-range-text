@@ -3,7 +3,7 @@
 function getTextNodes(el) {
   el = el || document.body
 
-  var doc = el.ownerDocument
+  var doc = el.ownerDocument || document
     , walker = doc.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false)
     , textNodes = []
     , node
