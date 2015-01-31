@@ -1,6 +1,6 @@
 {
   "name": "wrap-range-text",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Safely wrap all selected text contained within a DOM Range",
   "main": "index.js",
   "scripts": {
